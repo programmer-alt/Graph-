@@ -10,21 +10,19 @@ const DataComponent: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get<any>(
-          `https://api.openweathermap.org/data/2.5/weather?q=London&appid=503b5760f08bc1afaf91246a950c28f8&units=metric`
-        )
-    
+        const response = await axios.get<any>(`https://api.openweathermap.org/data/2.5/weather?q=London&appid=503b5760f08bc1afaf91246a950c28f8&units=metric`)
         const currentTemp = response.data.main.temp;
         const windSpeed = response.data.wind.speed;
-        const newData = { current: currentTemp, previous: windSpeed };
-        setWeatherData([...weatherData, newData])
+        const newData = { current: currentTemp, previous: windSpeed }
+         
 
+        setWeatherData([{current: currentTemp, previous: windSpeed} ])
       } catch (error) {
-        console.error('Ошибка запроса на сервер', error)
+        console.log('Ошибка запроса на сервер', error)
       }
     }
     fetchData()
-  }, [])
+  }, weatherData)
   const specificData = weatherData
   const previousData = specificData.filter(item => item.previous !== null)
   return (
