@@ -14,11 +14,7 @@ const DataComponent: React.FC = () => {
         const currentTemp = response.data.main.temp;
         const windSpeed = response.data.wind.speed;
         const newData = { current: currentTemp, previous: windSpeed }
-<<<<<<< HEAD
          
-=======
-          console.log(newData)
->>>>>>> 65b5e9a (replacing the data update hool in UseEffect)
 
         setWeatherData([{current: currentTemp, previous: windSpeed}])
       } catch (error) {
