@@ -16,7 +16,7 @@ const DataComponent: React.FC = () => {
         const newData = { current: currentTemp, previous: windSpeed }
          
 
-        setWeatherData([{current: currentTemp, previous: windSpeed}])
+        setWeatherData([{current: currentTemp, previous: windSpeed} ])
       } catch (error) {
         console.log('Ошибка запроса на сервер', error)
       }
