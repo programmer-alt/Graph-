@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import DataComponent from './dataComponent';
+import DataComponent from './DataComponent';
 
 function App() {
   
