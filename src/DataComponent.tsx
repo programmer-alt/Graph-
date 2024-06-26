@@ -14,7 +14,6 @@ const DataComponent: React.FC = () => {
         const currentTemp = response.data.main.temp;
         const windSpeed = response.data.wind.speed;
         const newData = { current: currentTemp, previous: windSpeed }
-         
 
         setWeatherData([{current: currentTemp, previous: windSpeed} ])
       } catch (error) {

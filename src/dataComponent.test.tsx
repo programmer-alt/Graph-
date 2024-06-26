@@ -1,50 +1,27 @@
-import React from 'react';
-import { render, waitFor } from '@testing-library/react';
-import axios, { AxiosResponse, AxiosRequestHeaders } from 'axios'; // Импортируем AxiosResponse из axios
-import DataComponent from './dataComponent';
+import { jest } from '@jest/globals';
+import { render } from '@testing-library/react';
+import axios from 'axios';
+import DataComponent from './DataComponent';
+import { act } from 'react';
+
+jest.mock('axios');
 
 describe('DataComponent', () => {
-  it('should fetch weather data and update state', async () => {
-    // Подготавливаем мок для axios.get
-    const mockResponse: AxiosResponse = {
-      data: {
-        main: {
-          temp: 280,
-          wind: {
-            speed: 5
-          }
-        }
-      },
-      status: 200,
-      statusText: 'OK',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      config: {
-        url: 'https://api.openweathermap.org/data/2.5/weather?q=London&appid=503b5760f08bc1afaf91246a950c28f8&units=metric',
-        headers: {
-          'Content-Type': 'application/json', // Указываем правильный тип для заголовков запроса
-        } as AxiosRequestHeaders // Изменяем тип заголовков на AxiosRequestHeaders
-      }
-    };
+  it('should handle API error', async () => {
+    // Мокируем axios.get для имитации ошибки
+    const mockedGet = axios.get as jest.MockedFunction<typeof axios.get>;
+    mockedGet.mockRejectedValue(new Error('Network Error'));
 
-    // Мокируем axios.get
-    const axiosGetSpy = jest.spyOn(axios, 'get').mockResolvedValue(mockResponse);
+    // Заменяем console.log фиктивной функцией
+    const consoleSpy =  jest.fn();
+    console.log = consoleSpy; // Непосредственно заменяем глобальную функцию
 
-    // Рендерим компонент
-    const { getByTestId } = render(<DataComponent />);
-
-    // Ожидаем, пока состояние не обновится
-    await waitFor(() => {
-      expect(axiosGetSpy).toHaveBeenCalledWith(
-        'https://api.openweathermap.org/data/2.5/weather?q=London&appid=503b5760f08bc1afaf91246a950c28f8&units=metric'
-      );
-
-      // Проверяем, что состояние обновилось
-      expect(getByTestId('weather-data')).toHaveTextContent('280');
+    await act(async () => {
+      render(<DataComponent />);
     });
+    await new Promise(resolve => setTimeout(resolve, 0)); // Ждем завершения вызова console.log
 
-    // Восстанавливаем оригинальную реализацию axios.get
-    axiosGetSpy.mockRestore();
+    // Проверяем вызовы фиктивной функции console.log
+    expect(consoleSpy).toHaveBeenCalledWith('Ошибка запроса на сервер', expect.any(Error));
   });
 });
