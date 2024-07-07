@@ -1,31 +1,40 @@
-import {jest} from '@jest/globals';
-import { render, screen, waitFor} from '@testing-library/react';
-import axios from 'axios';
-import DataComponent from './DataComponent';
-import { act } from 'react';
-import axiosMockAdapter from 'axios-mock-adapter';
+// Импорт необходимых библиотек и модулей
+import { jest } from '@jest/globals'; // Используем jest для мокирования и тестирования
+import { render, screen, waitFor } from '@testing-library/react'; // Библиотека для рендеринга компонентов и взаимодействия с DOM
+import axios from 'axios'; // HTTP клиент для выполнения запросов к API
+import DataComponent from './DataComponent'; // Компонент, который тестируется
+import { act } from 'react'; // Хелпер для обработки асинхронных операций в React
+import axiosMockAdapter from 'axios-mock-adapter'; // Модуль для мокирования axios запросов
 
+// Мокируем axios, чтобы контролировать ответы на HTTP запросы в тестах
 jest.mock('axios');
 
 describe('DataComponent', () => {
+  // Тестовый сценарий для проверки обработки ошибок API
   it('should handle API error', async () => {
-    // Мокируем axios.get для имитации ошибки
+    // Создаем мок для axios.get, чтобы он возвращал ошибку
     const mockedGet = axios.get as jest.MockedFunction<typeof axios.get>;
     mockedGet.mockRejectedValue(new Error('Network Error'));
 
-    // Заменяем console.log фиктивной функцией
+    // Заменяем стандартную функцию console.log на нашу фиктивную, чтобы отследить ее вызовы
     const consoleSpy = jest.fn();
-    console.log = consoleSpy; // Непосредственно заменяем глобальную функцию
+    console.log = consoleSpy;
 
+    // Рендерим компонент внутри асинхронного блока act, чтобы корректно обрабатывать любые изменения состояния
     await act(async () => {
       render(<DataComponent />);
     });
-    await new Promise(resolve => setTimeout(resolve, 0)); // Ждем завершения вызова console.log
 
-    // Проверяем вызовы фиктивной функции console.log
+    // Даем время на выполнение всех промисов и вызовов console.log
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    // Проверяем, что наш spy был вызван с ожидаемым сообщением об ошибке
     expect(consoleSpy).toHaveBeenCalledWith('Ошибка запроса на сервер', expect.any(Error));
   });
-  it ('should handle API response', async () => {
+
+  // Тестовый сценарий для проверки корректной обработки успешного ответа API
+  it('should handle API response', async () => {
+    // Подготавливаем мок данных для ответа от API
     const mockWeatherData = {
       data: {
         main: {
@@ -36,19 +45,21 @@ describe('DataComponent', () => {
         },
       },
     };
-  
-    jest.spyOn(axios, 'get').mockResolvedValue(mockWeatherData);
-  
+    // Создаем шпиона для axios.get, чтобы он возвращал наши мок данные
+    const axiosGetSpy = jest.spyOn(axios, 'get').mockResolvedValue(mockWeatherData);
+    // Рендерим компонент
     render(<DataComponent />);
-  
+    // Ожидаем, пока компонент не отрендерится и не обработает данные
     await waitFor(() => {
+      // Проверяем, что определенные элементы с текстом присутствуют в документе
       expect(screen.getByText(/Текущий график/i)).toBeInTheDocument();
       expect(screen.getByText(/Измерения в Bar/i)).toBeInTheDocument();
+      // Проверяем, что axios.get был вызван ровно один раз
+      expect(axiosGetSpy).toHaveBeenCalledTimes(1);
       // Проверяем, что данные о температуре и скорости ветра отображаются в компоненте
-      // Это предполагает, что компонент Graph корректно обрабатывает и отображает полученные данные
-    });
-  
+      expect(screen.getByText(String(mockWeatherData.data.main.temp))).toBeInTheDocument();
+      expect(screen.getByText(String(mockWeatherData.data.wind.speed))).toBeInTheDocument();});
+    // Восстанавливаем оригинальные методы после теста
     jest.restoreAllMocks();
-  })
-
-})
+  });
+});
