@@ -2,7 +2,7 @@ import React from 'react';
 import styles from './graph.module.css'
 
 type Props = {
-  data: { current: number; previous: number | null }[];
+  data: { temperature: number; windSpeed: number | null }[];
   width: number;
   height: number;
   color: string;
@@ -21,7 +21,7 @@ const Graph: React.FC<Props> = ({
   const space: number = 14;
   const partWidth =(300 / data.length);
   const totalWidth = partWidth /2;
-  const maxValue = Math.max(...data.map(item => item.current));
+  const maxValue = Math.max(...data.map(item => item.temperature));
   const topContainer = 30;
   const bottomAreaContainer = 30;
   const contentContainer = height - topContainer - bottomAreaContainer;
@@ -54,16 +54,16 @@ const blockGroupCss = {
     <div className={mainContainer} style={mainContainerStyle}>
       <div className={top_Container} style={{ minHeight: topContainer }}>{title}</div>
       <div className={content_Container} style={{ minHeight: contentContainer, ...minWContContainer }}>
-        {data.map(({ current, previous }, index) => (
+        {data.map(({ temperature, windSpeed }, index) => (
           <div key={index} className={blockGroup} style={{ ...blockGroupCss}}>
-            <div className={dataBar} key={`current-${index}`}>
-              <div className={graphColumn} style={{ height: `${(current / maxValue) * contentContainer}px`, ...graphColumnStyle}} />
-              <span className={spanValue} style={spanValueStyle}>{current}</span>
+            <div className={dataBar} key={`temperature-${index}`}>
+              <div className={graphColumn} style={{ height: `${(temperature / maxValue) * contentContainer}px`, ...graphColumnStyle}} />
+              <span className={spanValue} style={spanValueStyle}>{temperature}</span>
             </div>
-            {previous !== null && (
-              <div className={dataBar} key={`previous-${index}`}>
-                <div className={graphColumn_previous} style={{ height: `${(previous / maxValue) * contentContainer}px`, ...graphColumn_previousStyle }} />
-                <span className={spanValue} style={spanValueStyle}>{previous}</span>
+            {windSpeed !== null && (
+              <div className={dataBar} key={`windSpeed-${index}`}>
+                <div className={graphColumn_previous} style={{ height: `${(windSpeed / maxValue) * contentContainer}px`, ...graphColumn_previousStyle }} />
+                <span className={spanValue} style={spanValueStyle}>{windSpeed}</span>
               </div>
             )}
           </div>
