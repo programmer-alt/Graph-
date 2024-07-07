@@ -18,12 +18,12 @@ const DataComponent: React.FC = () => {
       }
     }
     fetchData()
-  }, weatherData)
+  }, [weatherData])
   const specificData = weatherData
-  const previousData = specificData.filter(item => item.windSpeed !== null)
+  const  historicalData = specificData.filter(item => item.windSpeed !== null)
   return (
     <div className="data" style={{ display: 'flex', flexDirection: 'row', maxHeight: '1000px' }}>
-      <Graph data={previousData} width={400} height={200} color="blue" title="Текущий график" bottomTitle="Измерения в Bar" />
+      <Graph data={ historicalData} width={400} height={200} color="blue" title="Текущий график" bottomTitle="Измерения в Bar" />
     </div>
   );
 };
