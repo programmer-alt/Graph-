@@ -1,7 +1,7 @@
 // Импорт необходимых библиотек и модулей
 import { jest } from "@jest/globals"; // Используем jest для мокирования и тестирования
-import { render, screen, waitFor, renderHook} from "@testing-library/react"; // Библиотека для рендеринга компонентов и взаимодействия с DOM
-import axios from "axios"; // HTTP клиент для выполнения запросов к API
+import { render, screen, waitFor, renderHook,RenderHookResult} from "@testing-library/react"; // Библиотека для рендеринга компонентов и взаимодействия с DOM
+import axios, { AxiosPromise } from 'axios'; // HTTP клиент для выполнения запросов к API
 import DataComponent from "./DataComponent"; // Компонент, который тестируется
 import { act } from "react"; // Хелпер для обработки асинхронных операций в React
 import  Graph  from './graph';
@@ -83,14 +83,13 @@ it('should pass historicalData from DataComponent prop to Graph component', asyn
   }));
   // Рендерим компонент Graph с переданными данными
   render(<Graph data={modifiedData} width={400} height={200} color="blue" title="Текущий график" bottomTitle="Измерения в Bar" />);
-  // Сохраняем переданные данные в переменную propsData
-  const historicalData = modifiedData;
-  // Проверяем, что данные, переданные в компонент, соответствуют исходным данным
-  expect(historicalData).toEqual(modifiedData)
+  
+  // Используем функцию-подсказчик для поиска текста, который может быть разделен другими элементами
+  expect(screen.getByText(String(modifiedData[0].temperature))).toBeInTheDocument();
+  if (modifiedData[0].windSpeed !== null) {
+    expect(screen.getByText(String(modifiedData[0].windSpeed))).toBeInTheDocument();
+  }
 });
-  
-  
-  
-  
+
 
 });
