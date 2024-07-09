@@ -1,20 +1,20 @@
 // Импорт необходимых библиотек и модулей
-import { jest } from '@jest/globals'; // Используем jest для мокирования и тестирования
-import { render, screen, waitFor } from '@testing-library/react'; // Библиотека для рендеринга компонентов и взаимодействия с DOM
-import axios from 'axios'; // HTTP клиент для выполнения запросов к API
-import DataComponent from './DataComponent'; // Компонент, который тестируется
-import { act } from 'react'; // Хелпер для обработки асинхронных операций в React
-import axiosMockAdapter from 'axios-mock-adapter'; // Модуль для мокирования axios запросов
+import { jest } from "@jest/globals"; // Используем jest для мокирования и тестирования
+import { render, screen, waitFor, renderHook,RenderHookResult} from "@testing-library/react"; // Библиотека для рендеринга компонентов и взаимодействия с DOM
+import axios, { AxiosPromise } from 'axios'; // HTTP клиент для выполнения запросов к API
+import DataComponent from "./DataComponent"; // Компонент, который тестируется
+import { act } from "react"; // Хелпер для обработки асинхронных операций в React
+import  Graph  from './graph';
 
 // Мокируем axios, чтобы контролировать ответы на HTTP запросы в тестах
-jest.mock('axios');
+jest.mock("axios");
 
-describe('DataComponent', () => {
+describe("DataComponent", () => {
   // Тестовый сценарий для проверки обработки ошибок API
-  it('should handle API error', async () => {
+  it("should handle API error", async () => {
     // Создаем мок для axios.get, чтобы он возвращал ошибку
     const mockedGet = axios.get as jest.MockedFunction<typeof axios.get>;
-    mockedGet.mockRejectedValue(new Error('Network Error'));
+    mockedGet.mockRejectedValue(new Error("Network Error"));
 
     // Заменяем стандартную функцию console.log на нашу фиктивную, чтобы отследить ее вызовы
     const consoleSpy = jest.fn();
@@ -26,15 +26,18 @@ describe('DataComponent', () => {
     });
 
     // Даем время на выполнение всех промисов и вызовов console.log
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     // Проверяем, что наш spy был вызван с ожидаемым сообщением об ошибке
-    expect(consoleSpy).toHaveBeenCalledWith('Ошибка запроса на сервер', expect.any(Error));
+    expect(consoleSpy).toHaveBeenCalledWith(
+      "Ошибка запроса на сервер",
+      expect.any(Error)
+    );
   });
 
   // Тестовый сценарий для проверки корректной обработки успешного ответа API
-  it('should handle API response', async () => {
-    // Подготавливаем мок данных для ответа от API
+  it("should handle API response", async () => {
+    // Подготавливаем мок данных для ответа от APIке
     const mockWeatherData = {
       data: {
         main: {
@@ -46,7 +49,9 @@ describe('DataComponent', () => {
       },
     };
     // Создаем шпиона для axios.get, чтобы он возвращал наши мок данные
-    const axiosGetSpy = jest.spyOn(axios, 'get').mockResolvedValue(mockWeatherData);
+    const axiosGetSpy = jest
+      .spyOn(axios, "get")
+      .mockResolvedValue(mockWeatherData);
     // Рендерим компонент
     render(<DataComponent />);
     // Ожидаем, пока компонент не отрендерится и не обработает данные
@@ -57,9 +62,34 @@ describe('DataComponent', () => {
       // Проверяем, что axios.get был вызван ровно один раз
       expect(axiosGetSpy).toHaveBeenCalledTimes(1);
       // Проверяем, что данные о температуре и скорости ветра отображаются в компоненте
-      expect(screen.getByText(String(mockWeatherData.data.main.temp))).toBeInTheDocument();
-      expect(screen.getByText(String(mockWeatherData.data.wind.speed))).toBeInTheDocument();});
+      expect(
+        screen.getByText(String(mockWeatherData.data.main.temp))
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(String(mockWeatherData.data.wind.speed))
+      ).toBeInTheDocument();
+    });
     // Восстанавливаем оригинальные методы после теста
     jest.restoreAllMocks();
   });
+// Определяем тестовый сценарий
+it('should pass historicalData from DataComponent prop to Graph component', async () => {
+  // Создаем моковые данные о погоде
+  const mockWeatherData = [{data: {main: {temp: 20,},wind: {speed: 5, },},}];
+  // Преобразуем моковые данные в нужный формат
+  const modifiedData = mockWeatherData.map(item => ({
+    temperature: item.data.main.temp,
+    windSpeed: item.data.wind.speed
+  }));
+  // Рендерим компонент Graph с переданными данными
+  render(<Graph data={modifiedData} width={400} height={200} color="blue" title="Текущий график" bottomTitle="Измерения в Bar" />);
+  
+  // Используем функцию-подсказчик для поиска текста, который может быть разделен другими элементами
+  expect(screen.getByText(String(modifiedData[0].temperature))).toBeInTheDocument();
+  if (modifiedData[0].windSpeed !== null) {
+    expect(screen.getByText(String(modifiedData[0].windSpeed))).toBeInTheDocument();
+  }
+});
+
+
 });
