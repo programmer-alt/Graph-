@@ -52,6 +52,7 @@ describe("DataComponent", () => {
     const axiosGetSpy = jest
       .spyOn(axios, "get")
       .mockResolvedValue(mockWeatherData);
+      //возврат данных о погоде
     // Рендерим компонент
     render(<DataComponent />);
     // Ожидаем, пока компонент не отрендерится и не обработает данные
@@ -72,6 +73,7 @@ describe("DataComponent", () => {
     // Восстанавливаем оригинальные методы после теста
     jest.restoreAllMocks();
   });
+
 // Определяем тестовый сценарий
 it('should pass historicalData from DataComponent prop to Graph component', async () => {
   // Создаем моковые данные о погоде
@@ -90,6 +92,5 @@ it('should pass historicalData from DataComponent prop to Graph component', asyn
     expect(screen.getByText(String(modifiedData[0].windSpeed))).toBeInTheDocument();
   }
 });
-
 
 });
